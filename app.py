@@ -21,6 +21,6 @@ yt_url.pack()
 #Prueba de descarga
 yt = YouTube('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
-yt.streams.first().download()
+yt.streams.first().download(output_path='/home/usuario/Python/PI/audio')
 
 root.mainloop()
