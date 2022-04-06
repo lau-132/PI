@@ -1,16 +1,21 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import ttk
 import pygame
 
-root = Tk()
+#Inicializaciones necesarias
+root = tk.Tk()
 root.title('First steps in')
+root.geometry("500x300")
 
-#Creando un Widget "Label"
-myLabel1 = Label(root, text='Hello World!')
-myLabel2 = Label(root, text='Me llamo Lautaro Lovecchio')
+pygame.mixer.init()
 
-#'Shoving it' a la ventana 
-myLabel1.grid(row=0,column=0)
-myLabel2.grid(row=1,column=1)
+#Creamos la "Playlist box"
+playlist_box = tk.Listbox(root, bg="black", fg="white", width="60")
+playlist_box.pack(pady=20)
+
+#
+yt_url = ttk.Entry()
+yt_url.pack()
 
 
 root.mainloop()
