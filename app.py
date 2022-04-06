@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import pygame
+from pytube import YouTube
 
 #Inicializaciones necesarias
 root = tk.Tk()
@@ -17,5 +18,8 @@ playlist_box.pack(pady=20)
 yt_url = ttk.Entry()
 yt_url.pack()
 
+yt = YouTube('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+
+yt.streams.first().download()
 
 root.mainloop()
