@@ -1,7 +1,28 @@
+import os
 import tkinter as tk
-from tkinter import ttk
+from tkinter import Button, ttk
 import pygame
 from pytube import YouTube
+
+AUDIO_PATH = '/home/usuario/Python/PI/audio'
+
+#Funcion que, dada una URL de Youtube, descarga el archivo en el directorio adecuado
+def download(self, URL):
+    yt = YouTube(URL)
+    checkIfAudioDirectoryExist()
+    yt.streams.first().download(output_path=AUDIO_PATH)
+
+#Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
+def checkIfAudioDirectoryExist(self):
+    if os.path.exists(AUDIO_PATH):
+        pass
+    else:
+        os.mkdir(AUDIO_PATH)
+
+#Funcion cuando el botón es pulsado para descargar
+def sendBtnClick(self, URL):
+    download(URL)
+
 
 #Inicializaciones necesarias
 root = tk.Tk()
@@ -16,11 +37,9 @@ playlist_box.pack(pady=20)
 
 #Entrada de la URL de Youtube
 yt_url = ttk.Entry()
+send_btn = Button(root, text="Descargar", command=sendBtnClick(yt_url.get()))
+
 yt_url.pack()
-
-#Prueba de descarga
-yt = YouTube('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-
-yt.streams.first().download(output_path='/home/usuario/Python/PI/audio')
+send_btn.pack()
 
 root.mainloop()
