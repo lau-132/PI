@@ -1,8 +1,9 @@
 import os
 import tkinter as tk
-from tkinter import Button, Frame, PhotoImage, ttk
+from tkinter import END, Button, Frame, Menu, PhotoImage, ttk, filedialog
 import pygame
-from pytube import YouTube, StreamQuery
+from pytube import YouTube
+import re
 
 AUDIO_PATH = '/home/usuario/Python/PI/audio'
 
@@ -30,7 +31,17 @@ def infoBtnClick():
     print(d.metadata)
     for key, value in d:
         print(key ,' : ', value)
-    
+
+#Funcion que añade una cancion a la playlist
+def add_song():
+    song = filedialog.askopenfilename(initialdir='audio/', title='Elija una canción' """,filetypes=(("mp3 Files", "*.mp3"), )""")
+
+    #"Limpiamos" el string de la cancion
+    song = song.replace('/home/usuario/Python/PI/audio/', "")
+    song = re.sub("\..*$", "", song)
+
+    #Insertamos la cancion en la playlist
+    playlist_box.insert(END, song)
 
 #Inicializaciones necesarias
 root = tk.Tk()
@@ -75,5 +86,13 @@ play_btn.grid(row=0, column=1, padx=10)
 pause_btn.grid(row=0, column=2, padx=10)
 forward_btn.grid(row=0, column=3, padx=10)
 stop_btn.grid(row=0, column=4, padx=10)
+
+#Creamos la barra de menú
+menu = Menu(root)
+root.config(menu=menu)
+
+add_song_menu = Menu(menu)
+menu.add_cascade(label='Añadir cancion', menu=add_song_menu)
+add_song_menu.add_command(label='Añadir cancion a la playlist', command=add_song)
 
 root.mainloop()
