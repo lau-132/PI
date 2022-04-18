@@ -25,12 +25,12 @@ def downloadBtnClick():
     download(yt_url.get())
 
 #Funcion para mostrar informacion de la URL
-def infoBtnClick():
-    yt  = YouTube(yt_url.get())
-    d = yt.metadata
-    print(d.metadata)
-    for key, value in d:
-        print(key ,' : ', value)
+#def infoBtnClick():
+#    yt  = YouTube(yt_url.get())
+#    d = yt.rating
+#    print(d)
+#    for key, value in d:
+#        print(key ,' : ', value)
     
 
 #Inicializaciones necesarias
@@ -47,10 +47,10 @@ playlist_box.pack(pady=20)
 #Entrada de la URL de Youtube
 yt_url = ttk.Entry()
 download_btn = Button(root, text="Descargar", command=downloadBtnClick)
-info_btn = Button(root, text="Info", command=infoBtnClick)
+#info_btn = Button(root, text="Info", command=infoBtnClick)
 
 yt_url.pack()
 download_btn.pack()
-info_btn.pack()
+#info_btn.pack()
 
 root.mainloop()
