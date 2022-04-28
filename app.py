@@ -80,6 +80,7 @@ def addManySongs():
     
 #Funcion que reproduce la cancion
 def play():
+    global current_song
     song = playlist_box.get(ACTIVE)
     song = addPathToSong(song)
 
@@ -87,6 +88,7 @@ def play():
     pygame.mixer.music.play(loops=0)
 
     current_song = playlist_box.curselection()[0]
+    print(current_song)
 
 #Funcion para parar la cancion
 def stop():
@@ -95,6 +97,7 @@ def stop():
 
 #Funcion para pasar a la siguiente cancion de la playlist
 def nextSong():
+    global current_song
     next_one = playlist_box.curselection()[0]+1
     
     song = playlist_box.get(next_one)
@@ -109,9 +112,11 @@ def nextSong():
     playlist_box.select_set(next_one, last=None)
 
     current_song += 1
+    print(current_song)
 
 #Funcion para pasar a la anterior cancion de la playlist
 def previousSong():
+    global current_song
     next_one = playlist_box.curselection()[0]-1
 
     song = playlist_box.get(next_one)
@@ -125,6 +130,7 @@ def previousSong():
     playlist_box.select_set(next_one, last=None)
 
     current_song -= 1
+    print(current_song)
 
 #Funcion para pausar y reanudar la cancion la cancion
 def pause(is_paused):
@@ -142,13 +148,18 @@ def pause(is_paused):
         
 #Funcion que borra una cancion de la playlist
 def deleteSong():
-    playlist_box.delete(ANCHOR)
-
-    if current_song == playlist_box.curselection()[0]:
-        pygame.mixer.music.stop()
+    global current_song
 
     if current_song > playlist_box.curselection()[0]:
         current_song -= 1
+    elif current_song == playlist_box.curselection()[0]:
+        pygame.mixer.music.stop()
+        current_song = None
+
+    
+    
+    print(current_song)
+    playlist_box.delete(ANCHOR)
 
 ##################################################################################################################
 ################################################ Interfaz Gráfica ################################################
