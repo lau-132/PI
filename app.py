@@ -10,11 +10,9 @@ import time
 AUDIO_PATH = '/home/usuario/Python/PI/audio'
 
 #Creacion de variable global "paused" para control de audio
-global paused
 paused = False
 
 #Creacion de variable global "current_song" para control de audio
-global current_song
 current_song = 0
 
 #Funcion que añade el path a una cancion pasada por parámetros
