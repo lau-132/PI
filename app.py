@@ -191,12 +191,15 @@ def playTime():
 
     status_bar.config(text= f'Time Elapsed : {converted_current_time}  ///  {converted_song_lenght}   ') 
 
-    #Update de el tiempo (Bucle de 1 seg)
+    #Actualizar posicion del slider cada segundo
+    song_slider.config(value= int(current_time))
+    #"Bucle" de 1 seg
     status_bar.after(1000, playTime)
 
 #Crear funcion del slider
 def slide(x):
-    slider_label.config(text= f' {int(song_slider.get())} of {int(song_lenght)}')
+    #slider_label.config(text= f' {int(song_slider.get())} of {int(song_lenght)}')
+    pygame.mixer.music.set_pos()
 
 
 
@@ -207,7 +210,7 @@ def slide(x):
 #Inicializaciones necesarias
 root = tk.Tk()
 root.title('Prueba de modulo pytube')
-root.geometry("600x600")
+root.geometry("550x500")
 pygame.mixer.init()
 
 #Creamos la "Playlist box" y el boton de eliminar cancion
@@ -275,6 +278,6 @@ song_slider = ttk.Scale(root, from_=0, to= 100, orient= HORIZONTAL, value= 0, co
 song_slider.pack(pady= 30)
 
 #Label temporal del slider
-slider_label = Label(root, text='0')
-slider_label.pack(pady= 10)
+#slider_label = Label(root, text='0')
+#slider_label.pack(pady= 10)
 root.mainloop()
