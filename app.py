@@ -1,11 +1,12 @@
 import os
 import tkinter as tk
-from tkinter import ACTIVE, ANCHOR, END, Button, Frame, Menu, PhotoImage, ttk, filedialog
+from tkinter import ACTIVE, ANCHOR, BOTTOM, E, END, GROOVE, HORIZONTAL, X, Button, Frame, Label, Menu, PhotoImage, ttk, filedialog
 import pygame
 from pytube import YouTube
 import re
 import moviepy.editor as mp
 import time
+from mutagen.mp3 import MP3
 
 AUDIO_PATH = '/home/usuario/Python/PI/audio'
 
@@ -85,13 +86,26 @@ def play():
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
 
+    #Llamamos a la funcion "playTime" para que se ejecute cada vez que comienza una cancion
+    playTime()
+
+    #Actualizamos el slider a la posicion adecuada
+    slider_position = int(song_lenght)
+    song_slider.config(to= slider_position, value= 0)
+
     current_song = playlist_box.curselection()[0]
     print(current_song)
+
+    
+    
 
 #Funcion para parar la cancion
 def stop():
     pygame.mixer.music.stop()
     playlist_box.selection_clear(ACTIVE)
+
+    #Limpiar la 'status_bar'
+    status_bar.config(text= '')
 
 #Funcion para pasar a la siguiente cancion de la playlist
 def nextSong():
@@ -153,11 +167,38 @@ def deleteSong():
     elif current_song == playlist_box.curselection()[0]:
         pygame.mixer.music.stop()
         current_song = None
-
-    
     
     print(current_song)
     playlist_box.delete(ANCHOR)
+
+def playTime():
+    #Cogemos la el tiempo actual en la cancion
+    current_time = pygame.mixer.music.get_pos() / 1000
+
+    #Lo convertimos
+    converted_current_time = time.strftime('%M:%S', time.gmtime(current_time))
+
+    #Crear variable de longitud de la cancion
+    global current_song
+    song = playlist_box.get(current_song)
+    song = addPathToSong(song)
+
+    song_mute = MP3(song)
+    global song_lenght
+    song_lenght = song_mute.info.length
+
+    converted_song_lenght = time.strftime('%M:%S', time.gmtime(song_lenght))
+
+    status_bar.config(text= f'Time Elapsed : {converted_current_time}  ///  {converted_song_lenght}   ') 
+
+    #Update de el tiempo (Bucle de 1 seg)
+    status_bar.after(1000, playTime)
+
+#Crear funcion del slider
+def slide(x):
+    slider_label.config(text= f' {int(song_slider.get())} of {int(song_lenght)}')
+
+
 
 ##################################################################################################################
 ################################################ Interfaz Gráfica ################################################
@@ -225,4 +266,15 @@ add_song_menu.add_command(label='Añadir cancion a la playlist',command=addSong)
 #Boton "Añadir multiples canciones"
 add_song_menu.add_command(label='Añadir varias canciones a la playlist',command=addManySongs)
 
+#Labels de duracion de cancion y tiempo de reproduccion actualizado
+status_bar = Label(root, text= '', bd= 1, relief= GROOVE, anchor= E)
+status_bar.pack(fill= X, side= BOTTOM, ipady= 2)
+
+#Creamos un slider de posicion en la cancion
+song_slider = ttk.Scale(root, from_=0, to= 100, orient= HORIZONTAL, value= 0, command= slide, length= 360)
+song_slider.pack(pady= 30)
+
+#Label temporal del slider
+slider_label = Label(root, text='0')
+slider_label.pack(pady= 10)
 root.mainloop()
