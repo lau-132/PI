@@ -32,7 +32,9 @@ def deletePathToSong(song):
 def download(URL):
     song_path = AUDIO_PATH+'/{0}'
     yt = YouTube(URL)
+
     checkIfAudioDirectoryExist()
+
     yt.streams.get_lowest_resolution().download(output_path=AUDIO_PATH)
     song = mp.VideoFileClip(song_path.format(yt.title)+'.mp4')
     song.audio.write_audiofile(song_path.format(yt.title)+'.mp3')
@@ -89,12 +91,8 @@ def play():
     #Llamamos a la funcion "playTime" para que se ejecute cada vez que comienza una cancion
     playTime()
 
-    #Actualizamos el slider a la posicion adecuada
-    slider_position = int(song_lenght)
-    song_slider.config(to= slider_position, value= 0)
-
-    current_song = playlist_box.curselection()[0]
-    print(current_song)
+    #current_song = playlist_box.curselection()[0]
+    #print(current_song)
 
     
     
@@ -175,32 +173,68 @@ def playTime():
     #Cogemos la el tiempo actual en la cancion
     current_time = pygame.mixer.music.get_pos() / 1000
 
+    #Temp label para recoger data
+    slider_label.config(text=f'Slider: { int(song_slider.get())} and Song Position: {int(current_time)}')
+
     #Lo convertimos
     converted_current_time = time.strftime('%M:%S', time.gmtime(current_time))
 
-    #Crear variable de longitud de la cancion
+    #Cogemos la cancion actual
     global current_song
     song = playlist_box.get(current_song)
     song = addPathToSong(song)
 
+    #La convertimos tambien
     song_mute = MP3(song)
+
+    #Crear variable de longitud de la cancion
     global song_lenght
     song_lenght = song_mute.info.length
 
     converted_song_lenght = time.strftime('%M:%S', time.gmtime(song_lenght))
 
-    status_bar.config(text= f'Time Elapsed : {converted_current_time}  ///  {converted_song_lenght}   ') 
+    current_time += 1
+
+
+    if int(song_slider.get()) == int(song_lenght):
+        status_bar.config(text= f'Time Elapsed : {converted_song_lenght}  ///  {converted_song_lenght}   ') 
+
+    elif int(song_slider.get()) == int(current_time):
+        #El slider NO se ha movido
+
+        #Actualizamos el slider a la posicion adecuada
+        slider_position = int(song_lenght)
+        song_slider.config(to= slider_position, value= int(current_time))
+    else:
+        #El slider SE HA MOVIDO
+        
+        #Actualizamos el slider a la posicion adecuada
+        slider_position = int(song_lenght)
+        song_slider.config(to= slider_position, value= int(song_slider.get()))
+
+        converted_current_time = time.strftime('%M:%S', time.gmtime(int(song_slider.get())))
+
+        status_bar.config(text= f'Time Elapsed : {converted_current_time}  ///  {converted_song_lenght}   ') 
+
+        next_time = int(song_slider.get()) + 1
+        song_slider.config(value=next_time)
+
 
     #Actualizar posicion del slider cada segundo
-    song_slider.config(value= int(current_time))
+    #song_slider.config(value= int(current_time))
+
     #"Bucle" de 1 seg
     status_bar.after(1000, playTime)
 
 #Crear funcion del slider
 def slide(x):
     #slider_label.config(text= f' {int(song_slider.get())} of {int(song_lenght)}')
-    pygame.mixer.music.set_pos()
+    #pygame.mixer.music.set_pos()
+    song = playlist_box.get(current_song)
+    song = addPathToSong(song)
 
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0, start=int(song_slider.get()))
 
 
 ##################################################################################################################
@@ -278,6 +312,6 @@ song_slider = ttk.Scale(root, from_=0, to= 100, orient= HORIZONTAL, value= 0, co
 song_slider.pack(pady= 30)
 
 #Label temporal del slider
-#slider_label = Label(root, text='0')
-#slider_label.pack(pady= 10)
+slider_label = Label(root, text='0')
+slider_label.pack(pady= 10)
 root.mainloop()
