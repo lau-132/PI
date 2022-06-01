@@ -244,7 +244,7 @@ def slide(x):
 #Inicializaciones necesarias
 root = tk.Tk()
 root.title('Prueba de modulo pytube')
-root.geometry("550x500")
+root.geometry("550x550")
 pygame.mixer.init()
 
 #Creamos la "Playlist box" y el boton de eliminar cancion
