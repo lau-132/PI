@@ -80,13 +80,23 @@ def addManySongs():
 #        print(key ,' : ', value)
     
 #Funcion que reproduce la cancion
-def play():
-    global current_song
+def play(evt):
+    stop()
+    #global current_song
+    selected_item = evt.widget.curselection()
+    print(selected_item)
+
+    if selected_item:
+        index = selected_item[0]-1
+        data = evt.widget.get(index)
+        print(data)
+    else:
+        pass   
     song = playlist_box.get(ACTIVE)
     song = addPathToSong(song)
 
     pygame.mixer.music.load(song)
-    pygame.mixer.music.play(loops=0)
+    pygame.mixer.music.play()
 
     #Llamamos a la funcion "playTime" para que se ejecute cada vez que comienza una cancion
     playTime()
@@ -94,7 +104,14 @@ def play():
     #current_song = playlist_box.curselection()[0]
     #print(current_song)
 
-    
+def callback(event):
+    selection = event.widget.curselection()
+    if selection:
+        index = selection[0]
+        data = event.widget.get(index)
+        label.configure(text=data)
+    else:
+        label.configure(text="")   
     
 
 #Funcion para parar la cancion
@@ -174,7 +191,7 @@ def playTime():
     current_time = pygame.mixer.music.get_pos() / 1000
 
     #Temp label para recoger data
-    slider_label.config(text=f'Slider: { int(song_slider.get())} and Song Position: {int(current_time)}')
+    #slider_label.config(text=f'Slider: { int(song_slider.get())} and Song Position: {int(current_time)}')
 
     #Lo convertimos
     converted_current_time = time.strftime('%M:%S', time.gmtime(current_time))
@@ -197,8 +214,9 @@ def playTime():
 
 
     if int(song_slider.get()) == int(song_lenght):
-        status_bar.config(text= f'Time Elapsed : {converted_song_lenght}  ///  {converted_song_lenght}   ') 
-
+        status_bar.config(text= f'Time Elapsed : {converted_song_lenght}  ///  {converted_song_lenght}   ')
+    elif paused:
+        pass
     elif int(song_slider.get()) == int(current_time):
         #El slider NO se ha movido
 
@@ -253,6 +271,7 @@ playlist_frame.pack(pady=20)
 
 playlist_box = tk.Listbox(playlist_frame, bg="gray", fg="white", width="60")
 playlist_box.grid(row=0, column=0, padx=10)
+playlist_box.bind("<<ListboxSelect>>", play)
 
 delete_btn_img = PhotoImage(file='gui/bin.png')
 delete_song_btn = Button(playlist_frame, image=delete_btn_img, borderwidth=0, command= deleteSong)
@@ -284,12 +303,14 @@ play_btn = Button(controls_frame, image=play_btn_img, borderwidth=0, command= pl
 pause_btn = Button(controls_frame, image=pause_btn_img, borderwidth=0, command= lambda: pause(paused))
 forward_btn = Button(controls_frame, image=forward_btn_img, borderwidth=0, command= nextSong)
 stop_btn = Button(controls_frame, image=stop_btn_img, borderwidth=0, command= stop)
- 
+
+
 back_btn.grid(row=0, column=0, padx=10)
-play_btn.grid(row=0, column=1, padx=10)
+#play_btn.grid(row=0, column=1, padx=10)
 pause_btn.grid(row=0, column=2, padx=10)
 forward_btn.grid(row=0, column=3, padx=10)
 stop_btn.grid(row=0, column=4, padx=10)
+
 
 #Creamos la barra de menú
 menu = Menu(root)
@@ -312,6 +333,62 @@ song_slider = ttk.Scale(root, from_=0, to= 100, orient= HORIZONTAL, value= 0, co
 song_slider.pack(pady= 30)
 
 #Label temporal del slider
-slider_label = Label(root, text='0')
-slider_label.pack(pady= 10)
+#slider_label = Label(root, text='0')
+#slider_label.pack(pady= 10)
+root.mainloop()
+
+
+##########################################################################################################################
+###########################################################2.0############################################################
+##########################################################################################################################
+import os
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk, filedialog
+from pygame import mixer
+
+root = Tk()
+root.title('Music Player')
+root.geometry("920x670+290+85")
+root.configure(bg="#0f1a2b")
+root.resizable(False,False)
+
+mixer.init()
+
+#Icono
+image_icon=PhotoImage(file="logo.png")
+root.iconphoto(False,image_icon)
+
+Top=PhotoImage(file="top.png")
+Label(root,image=Top,bg="#0f1a2b").pack()
+
+#Logo
+Logo=PhotoImage(file="logo.png")
+Label(root,image=Logo,bg="#0f1a2b").place(x=65,y=110)
+
+#Botones
+play_button=PhotoImage(file="play.png")
+Button(root,image=play_button,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0).place(x=100,y=400)
+
+stop_button=PhotoImage(file="stop.png")
+Button(root,image=stop_button,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0).place(x=30,y=500)
+
+resume_button=PhotoImage(file="resume.png")
+Button(root,image=resume_button,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0).place(x=115,y=500)
+
+pause_button=PhotoImage(file="pause.png")
+Button(root,image=pause_button,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0).place(x=200,y=500)
+
+#Playlist
+menu=PhotoImage(file="menu.png")
+Label(root,image=menu,bg="#0f1a2b").pack(padx=10,pady=50,side=RIGHT)
+
+music_frame= Frame(root, bd=2,relief=RIDGE)
+music_frame.place(x=330, y=350, width=560,height=250)
+
+
 root.mainloop()
