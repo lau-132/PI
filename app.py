@@ -113,25 +113,38 @@ def callback(event):
     else:
         label.configure(text="")   
     
+        
+#Creacion variable de "parado"    
+global stopped
+stopped = True
 
 #Funcion para parar la cancion
 def stop():
+    #Reseteamos el slider y la barra de estatus
+    song_slider.config(value=0)
+    status_bar.config(text= '')
+    
+    #Paramos la musica
     pygame.mixer.music.stop()
     playlist_box.selection_clear(ACTIVE)
 
-    #Limpiar la 'status_bar'
-    status_bar.config(text= '')
+    #Establecemos la variable "stopped" como True
+    global stopped
+    stopped = True
 
 #Funcion para pasar a la siguiente cancion de la playlist
 def nextSong():
+    song_slider.config(value=0)
+    status_bar.config(text= '')
+
     global current_song
     next_one = playlist_box.curselection()[0]+1
     
-    song = playlist_box.get(next_one)
-    song = addPathToSong(song)
-    
-    pygame.mixer.music.load(song)
-    pygame.mixer.music.play(loops=0)
+    #song = playlist_box.get(next_one)
+    #song = addPathToSong(song)
+    play(next_one)
+    #pygame.mixer.music.load(song)
+    #pygame.mixer.music.play(loops=0)
     
 
     playlist_box.selection_clear(0, END)
@@ -143,14 +156,17 @@ def nextSong():
 
 #Funcion para pasar a la anterior cancion de la playlist
 def previousSong():
+    song_slider.config(value=0)
+    status_bar.config(text= '')
+
     global current_song
     next_one = playlist_box.curselection()[0]-1
 
-    song = playlist_box.get(next_one)
-    song = addPathToSong(song)
-
-    pygame.mixer.music.load(song)
-    pygame.mixer.music.play(loops=0)
+    #song = playlist_box.get(next_one)
+    #song = addPathToSong(song)
+    play()
+    #pygame.mixer.music.load(song)
+    #pygame.mixer.music.play(loops=0)
 
     playlist_box.selection_clear(0, END)
     playlist_box.activate(next_one)
@@ -175,6 +191,8 @@ def pause(is_paused):
         
 #Funcion que borra una cancion de la playlist
 def deleteSong():
+    stop()
+
     global current_song
 
     if current_song > playlist_box.curselection()[0]:
@@ -187,6 +205,10 @@ def deleteSong():
     playlist_box.delete(ANCHOR)
 
 def playTime():
+    #Comprobamos que no se tenga que reproducir
+    #if stopped:
+        #return
+
     #Cogemos la el tiempo actual en la cancion
     current_time = pygame.mixer.music.get_pos() / 1000
 
@@ -214,7 +236,7 @@ def playTime():
 
 
     if int(song_slider.get()) == int(song_lenght):
-        status_bar.config(text= f'Time Elapsed : {converted_song_lenght}  ///  {converted_song_lenght}   ')
+        status_bar.config(text= f'Time Elapsed : {converted_song_lenght}  ///  {converted_song_lenght}   ') 
     elif paused:
         pass
     elif int(song_slider.get()) == int(current_time):
@@ -262,7 +284,7 @@ def slide(x):
 #Inicializaciones necesarias
 root = tk.Tk()
 root.title('Prueba de modulo pytube')
-root.geometry("550x550")
+root.geometry("550x500")
 pygame.mixer.init()
 
 #Creamos la "Playlist box" y el boton de eliminar cancion
