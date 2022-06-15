@@ -304,7 +304,7 @@ def play_song():
     song_name=playlist.get(ACTIVE)
     mixer.music.load(playlist.get(ACTIVE))
     mixer.music.play()
-    music.config(text=song_name[0: -4])
+    song_label.config(text=song_name[0: -4])
 
 
 #Icono
@@ -321,19 +321,19 @@ Label(root,image=Logo,bg="#0f1a2b").place(x=65,y=110)
 #Botones
 play_button=PhotoImage(file="gui/play.png")
 Button(root,image=play_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= play_song).place(x=100,y=400)
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= play_song).place(x=100,y=450)
 
 stop_button=PhotoImage(file="gui/stop.png")
 Button(root,image=stop_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.stop).place(x=30,y=500)
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.stop).place(x=30,y=550)
 
 resume_button=PhotoImage(file="gui/resume.png")
 Button(root,image=resume_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.unpause).place(x=115,y=500)
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.unpause).place(x=115,y=550)
 
 pause_button=PhotoImage(file="gui/pause.png")
 Button(root,image=pause_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.pause).place(x=200,y=500)
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.pause).place(x=200,y=550)
 
 #Playlist
 menu=PhotoImage(file="gui/menu.png")
@@ -345,14 +345,14 @@ music_frame.place(x=330, y=350, width=560,height=250)
 Button(root, text="Abrir carpeta...", width=15, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=open_folder).place(x=330, y=300)
 
 scroll = Scrollbar(music_frame)
-playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#333333", fg="grey", selectbackground="lightblue",
+playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black", selectbackground="blue", selectforeground="white", 
     cursor="hand2", bd=0, yscrollcommand=scroll.set)
 scroll.config(command=playlist.yview)
 scroll.pack(side=RIGHT, fill=Y)
 playlist.pack(side=LEFT, fill=BOTH)
 
-music= Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
-music.place(x=330,y=265, anchor="w")
+song_label= Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
+song_label.place(x=330,y=265, anchor="w")
 
 
 root.mainloop()
