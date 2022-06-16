@@ -282,6 +282,8 @@ import moviepy.editor as mp
 import time
 from mutagen.mp3 import MP3
 
+MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
+
 class State:
     MAIN = 1
     PLAYLIST = 2
@@ -293,23 +295,20 @@ root.geometry("920x670+290+85")
 root.configure(bg="#0f1a2b")
 root.resizable(False,False)
 
-mixer.init()
-
 actual_state = State.MAIN
 
-MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
+mixer.init()
+
 #Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
 def checkIfAudioDirectoryExist():
     if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
 
+#def hide_main_windows():
 
 
 def playlist_window():
-    
-    play_button.place_forget()
-    stop_button.place_forget()
-    resume_button.place_forget()
-    pause_button.place_forget()
+    hide_main_windows()
+
     
     path= MUSIC_PATH
     if path:
@@ -326,6 +325,13 @@ def play_song():
     mixer.music.play()
     song_label.config(text=song_name[0: -4])
 
+
+checkIfAudioDirectoryExist()
+
+
+ ###############
+ # MAIN WINDOW #
+ ###############
 
 #Icono
 image_icon=PhotoImage(file="gui/logo.png")
@@ -361,7 +367,7 @@ pause_button.place(x=200,y=550)
 
 
 #Playlist
-short_menu_img = PhotoImage(file="gui/menu.png")
+short_menu_img = PhotoImage(file="gui/short_menu.png")
 short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
 short_menu.pack(padx=10,pady=50,side=RIGHT)
 
@@ -381,5 +387,9 @@ playlist.pack(side=LEFT, fill=BOTH)
 song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
 song_label.place(x=330,y=265, anchor="w")
 
+####################
+ # PLAYLIST WINDOW #
+ ###################
 
+ 
 root.mainloop()
