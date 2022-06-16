@@ -273,7 +273,7 @@
 ##################################################################################################################
 
 import os
-import tkinter as Tk
+import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
 from pygame import mixer
@@ -282,23 +282,43 @@ import moviepy.editor as mp
 import time
 from mutagen.mp3 import MP3
 
-root = Tk()
-root.title('PI - MP3 Player')
+class State:
+    MAIN = 1
+    PLAYLIST = 2
+    DOWNLOAD = 3
+
+root = tk.Tk()
+root.title('Proyecto Integrado - MP3 Player')
 root.geometry("920x670+290+85")
 root.configure(bg="#0f1a2b")
 root.resizable(False,False)
 
 mixer.init()
 
-def open_folder():
-    path= filedialog.askdirectory()
+actual_state = State.MAIN
+
+MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
+#Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
+def checkIfAudioDirectoryExist():
+    if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
+
+
+
+def playlist_window():
+    
+    play_button.place_forget()
+    stop_button.place_forget()
+    resume_button.place_forget()
+    pause_button.place_forget()
+    
+    path= MUSIC_PATH
     if path:
         os.chdir(path)
         songs=os.listdir(path)
         print(songs)
-    for song in songs:
-        if song.endswith(".mp3"):
-            playlist.insert(END, song)
+        for song in songs:
+            if song.endswith(".mp3"):
+                playlist.insert(END, song)
 
 def play_song():    
     song_name=playlist.get(ACTIVE)
@@ -316,33 +336,40 @@ Label(root,image=Top,bg="#0f1a2b").pack()
 
 #Logo
 Logo=PhotoImage(file="gui/logo.png")
-Label(root,image=Logo,bg="#0f1a2b").place(x=65,y=110)
+Label(root, image=Logo, bg="#0f1a2b").place(x=69,y=107)
 
 #Botones
-play_button=PhotoImage(file="gui/play.png")
-Button(root,image=play_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= play_song).place(x=100,y=450)
+play_button_img = PhotoImage(file="gui/play.png")
+play_button = Button(root,image=play_button_img,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= play_song)
+play_button.place(x=100,y=450)
 
-stop_button=PhotoImage(file="gui/stop.png")
-Button(root,image=stop_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.stop).place(x=30,y=550)
+stop_button_img = PhotoImage(file="gui/stop.png")
+stop_button = Button(root,image=stop_button_img,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.stop)
+stop_button.place(x=30,y=550)
 
-resume_button=PhotoImage(file="gui/resume.png")
-Button(root,image=resume_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.unpause).place(x=115,y=550)
+resume_button_img=PhotoImage(file="gui/resume.png")
+resume_button = Button(root,image=resume_button_img,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.unpause)
+resume_button.place(x=115,y=550)
 
-pause_button=PhotoImage(file="gui/pause.png")
-Button(root,image=pause_button,bg="#0f1a2b",
-    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.pause).place(x=200,y=550)
+pause_button_img=PhotoImage(file="gui/pause.png")
+pause_button = Button(root,image=pause_button_img,bg="#0f1a2b",
+    highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.pause)
+pause_button.place(x=200,y=550)
+
 
 #Playlist
-menu=PhotoImage(file="gui/menu.png")
-Label(root,image=menu,bg="#0f1a2b").pack(padx=10,pady=50,side=RIGHT)
+short_menu_img = PhotoImage(file="gui/menu.png")
+short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
+short_menu.pack(padx=10,pady=50,side=RIGHT)
 
-music_frame= Frame(root, bd=2,relief=RIDGE)
+music_frame = Frame(root, bd=2,relief=RIDGE)
 music_frame.place(x=330, y=350, width=560,height=250)
 
-Button(root, text="Abrir carpeta...", width=15, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=open_folder).place(x=330, y=300)
+playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=playlist_window)
+playlist_button.place(x=330, y=300)
 
 scroll = Scrollbar(music_frame)
 playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black", selectbackground="blue", selectforeground="white", 
@@ -351,7 +378,7 @@ scroll.config(command=playlist.yview)
 scroll.pack(side=RIGHT, fill=Y)
 playlist.pack(side=LEFT, fill=BOTH)
 
-song_label= Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
+song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
 song_label.place(x=330,y=265, anchor="w")
 
 
