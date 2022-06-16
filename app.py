@@ -291,7 +291,7 @@ class State:
 
 class App(tk.Frame):
     #Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
-    def checkIfAudioDirectoryExist():
+    def checkIfAudioDirectoryExist(self):
         if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
 
     def playlist_window(self):
@@ -325,51 +325,51 @@ class App(tk.Frame):
 
 
         #Icono
-        image_icon=PhotoImage(file="gui/logo.png")
+        image_icon = tk.PhotoImage(file="gui/logo.png")
         root.iconphoto(False,image_icon)
 
-        Top=PhotoImage(file="gui/top.png")
-        Label(root,image=Top,bg="#0f1a2b").pack()
+        Top = tk.PhotoImage(file="gui/top.png")
+        tk.Label(parent,image=Top,bg="#0f1a2b").pack()
 
         #Logo
-        Logo=PhotoImage(file="gui/logo.png")
-        Label(root, image=Logo, bg="#0f1a2b").place(x=69,y=107)
+        Logo=tk.PhotoImage(file="gui/logo.png")
+        tk.Label(self.parent, image=Logo, bg="#0f1a2b").place(x=69,y=107)
 
         #Botones
-        play_button_img = PhotoImage(file="gui/play.png")
-        play_button = Button(root,image=play_button_img,bg="#0f1a2b",
+        play_button_img = tk.PhotoImage(file="gui/play.png")
+        play_button = tk.Button(root,image=play_button_img,bg="#0f1a2b",
             highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= self.play_song)
         play_button.place(x=100,y=450)
 
-        stop_button_img = PhotoImage(file="gui/stop.png")
-        stop_button = Button(root,image=stop_button_img,bg="#0f1a2b",
+        stop_button_img = tk.PhotoImage(file="gui/stop.png")
+        stop_button = tk.Button(root,image=stop_button_img,bg="#0f1a2b",
             highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.stop)
         stop_button.place(x=30,y=550)
 
-        resume_button_img=PhotoImage(file="gui/resume.png")
-        resume_button = Button(root,image=resume_button_img,bg="#0f1a2b",
+        resume_button_img = tk.PhotoImage(file="gui/resume.png")
+        resume_button = tk.Button(root,image=resume_button_img,bg="#0f1a2b",
             highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.unpause)
         resume_button.place(x=115,y=550)
 
-        pause_button_img=PhotoImage(file="gui/pause.png")
+        pause_button_img= tk.PhotoImage(file="gui/pause.png")
         pause_button = Button(root,image=pause_button_img,bg="#0f1a2b",
             highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.pause)
         pause_button.place(x=200,y=550)
 
 
         #Playlist
-        short_menu_img = PhotoImage(file="gui/menu.png")
-        short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
+        short_menu_img = tk.PhotoImage(file="gui/menu.png")
+        short_menu = tk.Label(root,image=short_menu_img,bg="#0f1a2b")
         short_menu.pack(padx=10,pady=50,side=RIGHT)
 
-        music_frame = Frame(root, bd=2,relief=RIDGE)
+        music_frame = tk.Frame(root, bd=2,relief=RIDGE)
         music_frame.place(x=330, y=350, width=560,height=250)
 
-        playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=self.playlist_window)
+        playlist_button = tk.Button(root, text="Seleccionar playlist...", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=self.playlist_window)
         playlist_button.place(x=330, y=300)
 
-        scroll = Scrollbar(music_frame)
-        playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black", selectbackground="blue", selectforeground="white", 
+        scroll = tk.Scrollbar(music_frame)
+        playlist = tk.Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black", selectbackground="blue", selectforeground="white", 
             cursor="hand2", bd=0, yscrollcommand=scroll.set)
         scroll.config(command=playlist.yview)
         scroll.pack(side=RIGHT, fill=Y)
