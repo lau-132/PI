@@ -276,11 +276,12 @@ import os
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
-from pygame import mixer
+from pygame import *
 from pytube import YouTube
 from mutagen.mp3 import MP3
 import moviepy.editor as mp
 import db
+import models
 import threading
 #from db import Song
 
@@ -338,9 +339,9 @@ def show_download():
     hide_audio_controls()
     show_download_button.place_forget()
 
-    url_label.place(x=50,y=325)
-    yt_url.place(x=50,y=400)
-    download_button.place(x=135,y=450)
+    url_label.place(x=50,y=350)
+    yt_url.place(x=50,y=425)
+    download_button.place(x=135,y=500)
     audiocontrol_button.place(x=410, y=300)
 
 def playlist_window():
@@ -349,7 +350,7 @@ def playlist_window():
 
     
 
-    cancion1 = db.Song(1,'test1', '/home')
+    cancion1 = models.Song(song_id=1,song_name='test1', song_route='/home')
     cancion1.save()
     
     path= MUSIC_PATH
@@ -376,7 +377,7 @@ root.configure(bg="#0f1a2b")
 root.resizable(False,False)
 
 mixer.init()
-db.run()
+#db.run()
 checkIfAudioDirectoryExist()
 
 
@@ -396,7 +397,8 @@ Label(root,image=Top,bg="#0f1a2b").pack()
 Logo=PhotoImage(file="gui/logo.png")
 Label(root, image=Logo, bg="#0f1a2b").place(x=107,y=107)
 
-url_label = Label(root,bg="#0f1a2b", fg="white", text="Introduzca la URL de la cancion a descargar:", anchor='w')
+url_label = Label(root,bg="#0f1a2b", fg="white",
+ text="Introduzca la URL de la cancion a descargar:", anchor='w', font=("arial",10))
 #url_label.place(x=50,y=325)
 
 yt_url = Entry(root, width=35)
