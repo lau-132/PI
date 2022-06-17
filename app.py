@@ -368,7 +368,7 @@ def show_download():
 def show_playlist():
     hide_main()
 
-    long_menu.pack(padx=0,pady=55,anchor="center")
+    long_menu.pack(pady=60,side="bottom")
     #playlist_window_frame.place(x=37, y=300, width=888,height=300)
     
     
@@ -474,7 +474,7 @@ audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2
 #Menu
 short_menu_img = PhotoImage(file="gui/short_menu.png")
 short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
-short_menu.pack(padx=10,pady=50,side=RIGHT)
+short_menu.pack(padx=35,pady=50,side=RIGHT)
 
 #Frame del menu
 music_frame = Frame(root, bd=2,relief=RIDGE)
@@ -499,7 +499,7 @@ scroll.pack(side=RIGHT, fill=Y)
 playlist.pack(side=LEFT, fill=BOTH)
 
 #Label del título de la canción
-song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
+song_label = Label(root, text="ASDASDASDASD", font=("arial", 15), fg="white", bg="#0f1a2b")
 song_label.place(x=330,y=265, anchor="w")
 
 
