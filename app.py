@@ -285,6 +285,7 @@ import models
 import threading
 #from db import Song
 
+#Constantes
 MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
 YT_URL= 'https://www.youtube.com/watch?v='
 
@@ -292,19 +293,24 @@ YT_URL= 'https://www.youtube.com/watch?v='
 def checkIfAudioDirectoryExist():
     if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
 
+#Funcion de descarga para lanzar con un hilo
 def thread_function(URL):
     song_path = MUSIC_PATH+'/{0}'
     yt = YouTube(URL)
 
     checkIfAudioDirectoryExist()
 
+    #Descarga el video a menor resulución a la carpeta de música
     yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+    
+    #La convierte a '.mp3'
     song = mp.VideoFileClip(song_path.format(yt.title)+'.mp4')
     song.audio.write_audiofile(song_path.format(yt.title)+'.mp3')
-    #time.sleep(3)
+
+    #Borra el video
     os.remove(song_path.format(yt.title)+'.mp4')
 
-
+#Función de botón para lanzar el hilo con validacion básica
 def download():
     URL = yt_url.get()
 
@@ -315,6 +321,7 @@ def download():
     else:
         threading.Thread(target=thread_function, args=(URL,))
 
+#Funciones para limpiar zonas de la app
 def hide_audio_controls():
     play_button.place_forget()
     stop_button.place_forget()
@@ -327,6 +334,18 @@ def hide_download():
     audiocontrol_button.place_forget()
     download_button.place_forget()
 
+def hide_main():
+    hide_audio_controls()
+    hide_download()
+    short_menu.pack_forget()
+    playlist.place_forget()
+    scroll.pack_forget()
+    show_download_button.place_forget()
+    playlist_button.place_forget()
+    music_frame.place_forget()
+
+
+#Funciones para mostrar zonas de la app
 def show_audiocontrols():
     hide_download()
     play_button.place(x=150,y=450)
@@ -335,6 +354,8 @@ def show_audiocontrols():
     pause_button.place(x=255,y=550)
     show_download_button.place(x=410, y=300)
 
+
+
 def show_download():
     hide_audio_controls()
     show_download_button.place_forget()
@@ -342,16 +363,18 @@ def show_download():
     url_label.place(x=50,y=350)
     yt_url.place(x=50,y=425)
     download_button.place(x=135,y=500)
-    audiocontrol_button.place(x=410, y=300)
+    audiocontrol_button.place(x=410, y=300) 
 
-def playlist_window():
-    hide_audio_controls()
-    hide_download()
+def show_playlist():
+    hide_main()
 
+    playlist_window_frame.place(x=410, y=350, width=560,height=250)
+    long_menu.pack(padx=10,pady=50,side=RIGHT)
+    
     
 
-    cancion1 = models.Song(song_id=1,song_name='test1', song_route='/home')
-    cancion1.save()
+    #cancion1 = models.Song(song_id=1,song_name='test1', song_route='/home')
+    #cancion1.save()
     
     path= MUSIC_PATH
     if path:
@@ -381,9 +404,9 @@ mixer.init()
 checkIfAudioDirectoryExist()
 
 
- ###############
- # MAIN WINDOW #
- ###############
+###############
+# MAIN WINDOW #
+###############
 
 #Icono
 image_icon=PhotoImage(file="gui/logo.png")
@@ -397,14 +420,10 @@ Label(root,image=Top,bg="#0f1a2b").pack()
 Logo=PhotoImage(file="gui/logo.png")
 Label(root, image=Logo, bg="#0f1a2b").place(x=107,y=107)
 
-url_label = Label(root,bg="#0f1a2b", fg="white",
- text="Introduzca la URL de la cancion a descargar:", anchor='w', font=("arial",10))
-#url_label.place(x=50,y=325)
+#     #      ###     #      #
+#Controles de audio en MAIN #
+#     #      ###     #      #
 
-yt_url = Entry(root, width=35)
-#yt_url.place(x=100,y=400)
-
-#Botones de control de audio
 play_button_img = PhotoImage(file="gui/play.png")
 play_button = Button(root,image=play_button_img,bg="#0f1a2b",
     highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= play_song)
@@ -426,38 +445,75 @@ pause_button = Button(root,image=pause_button_img,bg="#0f1a2b",
 pause_button.place(x=255,y=550)
 
 
-#Playlist
+#   #   ###   #   #
+#Playlist en MAIN #
+#   #   ###   #   #
+
+#Menu
 short_menu_img = PhotoImage(file="gui/short_menu.png")
 short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
 short_menu.pack(padx=10,pady=50,side=RIGHT)
 
+#Frame del menu
 music_frame = Frame(root, bd=2,relief=RIDGE)
 music_frame.place(x=410, y=350, width=560,height=250)
 
-show_download_button = Button(root, text="Descargar canción", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_download)
+#Botón para mostrar 'Descargar'
+show_download_button = Button(root, text="Descargar canción", width=18, height=2,
+ font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_download)
 show_download_button.place(x=410, y=300)
 
-download_button = Button(root, text="Descargar", width=12, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=download)
-
-playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=playlist_window)
+#Botón para mostrar 'Playlist window'
+playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2,
+ font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_playlist)
 playlist_button.place(x=815, y=300)
 
-audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_audiocontrols)
-#audiocontrol_button.place(x=410, y=300)
-
+#Lista de acnciones de la playlist seleccionada
 scroll = Scrollbar(music_frame)
-playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black", selectbackground="blue", selectforeground="white", 
-    cursor="hand2", bd=0, yscrollcommand=scroll.set)
+playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black",selectbackground="blue", selectforeground="white",
+cursor="hand2", bd=0, yscrollcommand=scroll.set)
 scroll.config(command=playlist.yview)
 scroll.pack(side=RIGHT, fill=Y)
 playlist.pack(side=LEFT, fill=BOTH)
 
+#Label del título de la canción
 song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
 song_label.place(x=330,y=265, anchor="w")
+
+
+#   #   ###   #    #
+#Descargas en MAIN #
+#   #   ###   #    #
+
+#Label para el usuario
+url_label = Label(root,bg="#0f1a2b", fg="white",
+ text="Introduzca la URL de la cancion a descargar:", anchor='w', font=("arial",10))
+#url_label.place(x=50,y=325)
+
+#Input de URL
+yt_url = Entry(root, width=35)
+#yt_url.place(x=100,y=400)
+
+#Botón de descarga
+download_button = Button(root, text="Descargar", width=12, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=download)
+
+#Botón para mostrar 'Controles de audio'
+audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_audiocontrols)
+#audiocontrol_button.place(x=410, y=300)
+
+
 
 ####################
  # PLAYLIST WINDOW #
  ###################
 
- 
+playlist_window_frame = Frame(root, bd=2,relief=RIDGE)
+#playlist_window_frame.place(x=410, y=350, width=560,height=250)
+
+long_menu_img = PhotoImage(file="gui/long_menu.png")
+long_menu = Label(root,image=long_menu_img,bg="#0f1a2b")
+#long_menu.pack(padx=10,pady=50,side=RIGHT)
+
+
+
 root.mainloop()

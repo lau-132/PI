@@ -10,3 +10,5 @@ global s
 s = Session()
 
 Base = declarative_base()
+
+Base.metadata.create_all(engine)
