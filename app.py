@@ -368,8 +368,9 @@ def show_download():
 def show_playlist():
     hide_main()
 
-    playlist_window_frame.place(x=410, y=350, width=560,height=250)
-    long_menu.pack(padx=10,pady=50,side=RIGHT)
+    long_menu.pack(padx=0,pady=55,anchor="center")
+    #playlist_window_frame.place(x=37, y=300, width=888,height=300)
+    
     
     
 
@@ -445,6 +446,27 @@ pause_button = Button(root,image=pause_button_img,bg="#0f1a2b",
 pause_button.place(x=255,y=550)
 
 
+#   #   ###   #    #
+#Descargas en MAIN #
+#   #   ###   #    #
+
+#Label para el usuario
+url_label = Label(root,bg="#0f1a2b", fg="white",
+ text="Introduzca la URL de la cancion a descargar:", anchor='w', font=("arial",10))
+#url_label.place(x=50,y=325)
+
+#Input de URL
+yt_url = Entry(root, width=35)
+#yt_url.place(x=100,y=400)
+
+#Botón de descarga
+download_button = Button(root, text="Descargar", width=12, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=download)
+
+#Botón para mostrar 'Controles de audio'
+audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_audiocontrols)
+#audiocontrol_button.place(x=410, y=300)
+
+
 #   #   ###   #   #
 #Playlist en MAIN #
 #   #   ###   #   #
@@ -479,27 +501,6 @@ playlist.pack(side=LEFT, fill=BOTH)
 #Label del título de la canción
 song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
 song_label.place(x=330,y=265, anchor="w")
-
-
-#   #   ###   #    #
-#Descargas en MAIN #
-#   #   ###   #    #
-
-#Label para el usuario
-url_label = Label(root,bg="#0f1a2b", fg="white",
- text="Introduzca la URL de la cancion a descargar:", anchor='w', font=("arial",10))
-#url_label.place(x=50,y=325)
-
-#Input de URL
-yt_url = Entry(root, width=35)
-#yt_url.place(x=100,y=400)
-
-#Botón de descarga
-download_button = Button(root, text="Descargar", width=12, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=download)
-
-#Botón para mostrar 'Controles de audio'
-audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_audiocontrols)
-#audiocontrol_button.place(x=410, y=300)
 
 
 
