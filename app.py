@@ -291,32 +291,28 @@ YT_URL= 'https://www.youtube.com/watch?v='
 def checkIfAudioDirectoryExist():
     if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
 
+def thread_function(URL):
+    song_path = MUSIC_PATH+'/{0}'
+    yt = YouTube(URL)
+
+    checkIfAudioDirectoryExist()
+
+    yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+    song = mp.VideoFileClip(song_path.format(yt.title)+'.mp4')
+    song.audio.write_audiofile(song_path.format(yt.title)+'.mp3')
+    #time.sleep(3)
+    os.remove(song_path.format(yt.title)+'.mp4')
+
+
 def download():
     URL = yt_url.get()
-
-    
 
     if URL is None:
         messagebox.showinfo(message="La URL no puede estar vacía")
     elif YT_URL not in URL:
         messagebox.showinfo(message="La URL no es correcta, intentelo de nuevo")
     else:
-        #x = threading.Thread(target=thread_function)
-
-        song_path = MUSIC_PATH+'/{0}'
-        yt = YouTube(URL)
-
-        checkIfAudioDirectoryExist()
-
-        yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
-        song = mp.VideoFileClip(song_path.format(yt.title)+'.mp4')
-        song.audio.write_audiofile(song_path.format(yt.title)+'.mp3')
-        #time.sleep(3)
-        os.remove(song_path.format(yt.title)+'.mp4')
-
-
-
-    
+        threading.Thread(target=thread_function, args=(URL,))
 
 def hide_audio_controls():
     play_button.place_forget()
@@ -349,6 +345,9 @@ def show_download():
 
 def playlist_window():
     hide_audio_controls()
+    hide_download()
+
+    
 
     cancion1 = db.Song(1,'test1', '/home')
     cancion1.save()
