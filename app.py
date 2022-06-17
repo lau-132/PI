@@ -301,7 +301,7 @@ def download():
     elif YT_URL not in URL:
         messagebox.showinfo(message="La URL no es correcta, intentelo de nuevo")
     else:
-        x = threading.Thread(target=thread_function)
+        #x = threading.Thread(target=thread_function)
 
         song_path = MUSIC_PATH+'/{0}'
         yt = YouTube(URL)
