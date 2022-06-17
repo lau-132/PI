@@ -275,40 +275,83 @@
 import os
 import tkinter as tk
 from tkinter import *
-from tkinter import filedialog
+from tkinter import messagebox
 from pygame import mixer
 from pytube import YouTube
-import moviepy.editor as mp
-import time
 from mutagen.mp3 import MP3
+import moviepy.editor as mp
+import db
+import threading
+#from db import Song
 
 MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
-
-class State:
-    MAIN = 1
-    PLAYLIST = 2
-    DOWNLOAD = 3
-
-root = tk.Tk()
-root.title('Proyecto Integrado - MP3 Player')
-root.geometry("920x670+290+85")
-root.configure(bg="#0f1a2b")
-root.resizable(False,False)
-
-actual_state = State.MAIN
-
-mixer.init()
+YT_URL= 'https://www.youtube.com/watch?v='
 
 #Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
 def checkIfAudioDirectoryExist():
     if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
 
-#def hide_main_windows():
+def download():
+    URL = yt_url.get()
 
+    
+
+    if URL is None:
+        messagebox.showinfo(message="La URL no puede estar vacía")
+    elif YT_URL not in URL:
+        messagebox.showinfo(message="La URL no es correcta, intentelo de nuevo")
+    else:
+        x = threading.Thread(target=thread_function)
+
+        song_path = MUSIC_PATH+'/{0}'
+        yt = YouTube(URL)
+
+        checkIfAudioDirectoryExist()
+
+        yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+        song = mp.VideoFileClip(song_path.format(yt.title)+'.mp4')
+        song.audio.write_audiofile(song_path.format(yt.title)+'.mp3')
+        #time.sleep(3)
+        os.remove(song_path.format(yt.title)+'.mp4')
+
+
+
+    
+
+def hide_audio_controls():
+    play_button.place_forget()
+    stop_button.place_forget()
+    resume_button.place_forget()
+    pause_button.place_forget()
+
+def hide_download():
+    url_label.place_forget()
+    yt_url.place_forget()
+    audiocontrol_button.place_forget()
+    download_button.place_forget()
+
+def show_audiocontrols():
+    hide_download()
+    play_button.place(x=150,y=450)
+    stop_button.place(x=75,y=550)
+    resume_button.place(x=165,y=550)
+    pause_button.place(x=255,y=550)
+    show_download_button.place(x=410, y=300)
+
+def show_download():
+    hide_audio_controls()
+    show_download_button.place_forget()
+
+    url_label.place(x=50,y=325)
+    yt_url.place(x=50,y=400)
+    download_button.place(x=135,y=450)
+    audiocontrol_button.place(x=410, y=300)
 
 def playlist_window():
-    hide_main_windows()
+    hide_audio_controls()
 
+    cancion1 = db.Song(1,'test1', '/home')
+    cancion1.save()
     
     path= MUSIC_PATH
     if path:
@@ -317,7 +360,7 @@ def playlist_window():
         print(songs)
         for song in songs:
             if song.endswith(".mp3"):
-                playlist.insert(END, song)
+                playlist.insert(END, song[0: -4])
 
 def play_song():    
     song_name=playlist.get(ACTIVE)
@@ -326,6 +369,15 @@ def play_song():
     song_label.config(text=song_name[0: -4])
 
 
+# INICIALIZACIONES #
+root = tk.Tk()
+root.title('Proyecto Integrado - MP3 Player')
+root.geometry("1000x670+290+85")
+root.configure(bg="#0f1a2b")
+root.resizable(False,False)
+
+mixer.init()
+db.run()
 checkIfAudioDirectoryExist()
 
 
@@ -337,33 +389,40 @@ checkIfAudioDirectoryExist()
 image_icon=PhotoImage(file="gui/logo.png")
 root.iconphoto(False,image_icon)
 
+#Banner superior
 Top=PhotoImage(file="gui/top.png")
 Label(root,image=Top,bg="#0f1a2b").pack()
 
 #Logo
 Logo=PhotoImage(file="gui/logo.png")
-Label(root, image=Logo, bg="#0f1a2b").place(x=69,y=107)
+Label(root, image=Logo, bg="#0f1a2b").place(x=107,y=107)
 
-#Botones
+url_label = Label(root,bg="#0f1a2b", fg="white", text="Introduzca la URL de la cancion a descargar:", anchor='w')
+#url_label.place(x=50,y=325)
+
+yt_url = Entry(root, width=35)
+#yt_url.place(x=100,y=400)
+
+#Botones de control de audio
 play_button_img = PhotoImage(file="gui/play.png")
 play_button = Button(root,image=play_button_img,bg="#0f1a2b",
     highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command= play_song)
-play_button.place(x=100,y=450)
+play_button.place(x=150,y=450)
 
 stop_button_img = PhotoImage(file="gui/stop.png")
 stop_button = Button(root,image=stop_button_img,bg="#0f1a2b",
     highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.stop)
-stop_button.place(x=30,y=550)
+stop_button.place(x=75,y=550)
 
 resume_button_img=PhotoImage(file="gui/resume.png")
 resume_button = Button(root,image=resume_button_img,bg="#0f1a2b",
     highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.unpause)
-resume_button.place(x=115,y=550)
+resume_button.place(x=165,y=550)
 
 pause_button_img=PhotoImage(file="gui/pause.png")
 pause_button = Button(root,image=pause_button_img,bg="#0f1a2b",
     highlightbackground ="#0f1a2b",highlightthickness = 1, bd=0, command=mixer.music.pause)
-pause_button.place(x=200,y=550)
+pause_button.place(x=255,y=550)
 
 
 #Playlist
@@ -372,10 +431,18 @@ short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
 short_menu.pack(padx=10,pady=50,side=RIGHT)
 
 music_frame = Frame(root, bd=2,relief=RIDGE)
-music_frame.place(x=330, y=350, width=560,height=250)
+music_frame.place(x=410, y=350, width=560,height=250)
+
+show_download_button = Button(root, text="Descargar canción", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_download)
+show_download_button.place(x=410, y=300)
+
+download_button = Button(root, text="Descargar", width=12, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=download)
 
 playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=playlist_window)
-playlist_button.place(x=330, y=300)
+playlist_button.place(x=815, y=300)
+
+audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2, font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_audiocontrols)
+#audiocontrol_button.place(x=410, y=300)
 
 scroll = Scrollbar(music_frame)
 playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black", selectbackground="blue", selectforeground="white", 

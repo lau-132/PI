@@ -1,1 +1,3 @@
 /audio
+/__pyccache__
+db.sqlite
