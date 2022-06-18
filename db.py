@@ -6,8 +6,8 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine('sqlite:///db.sqlite')
 Session = sessionmaker(bind=engine)
 
-global s
-s = Session()
+global session
+session = Session()
 
 Base = declarative_base()
 

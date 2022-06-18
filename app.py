@@ -276,6 +276,7 @@ import os
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
+from tkinter.ttk import Combobox
 from pygame import *
 from pytube import YouTube
 from mutagen.mp3 import MP3
@@ -283,16 +284,27 @@ import moviepy.editor as mp
 import db
 import models
 import threading
+import init_db
 #from db import Song
 
 #Constantes
 MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
 YT_URL= 'https://www.youtube.com/watch?v='
 
+class STATE():
+    AUDIOCONTROL = 1
+    DOWNLOAD = 2
+    PLAYLIST = 3
+
 #Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
 def checkIfAudioDirectoryExist():
     if not os.path.exists(MUSIC_PATH): os.mkdir(MUSIC_PATH)
 
+def combo_function(event):
+    selection = playlist_combo.get()
+
+    tmp = models.Playlist_Song_Exchange.get_by_id_playlist(selection)
+    print(tmp)
 #Funcion de descarga para lanzar con un hilo
 def thread_function(URL):
     song_path = MUSIC_PATH+'/{0}'
@@ -309,6 +321,8 @@ def thread_function(URL):
 
     #Borra el video
     os.remove(song_path.format(yt.title)+'.mp4')
+
+
 
 #Función de botón para lanzar el hilo con validacion básica
 def download():
@@ -334,20 +348,13 @@ def hide_download():
     audiocontrol_button.place_forget()
     download_button.place_forget()
 
-def hide_main():
-    hide_audio_controls()
-    hide_download()
-    short_menu.pack_forget()
-    playlist.place_forget()
-    scroll.pack_forget()
-    show_download_button.place_forget()
-    playlist_button.place_forget()
-    music_frame.place_forget()
-
+def hide_playlist():
+    back_button.place_forget()
 
 #Funciones para mostrar zonas de la app
 def show_audiocontrols():
     hide_download()
+    hide_playlist()
     play_button.place(x=150,y=450)
     stop_button.place(x=75,y=550)
     resume_button.place(x=165,y=550)
@@ -366,25 +373,40 @@ def show_download():
     audiocontrol_button.place(x=410, y=300) 
 
 def show_playlist():
-    hide_main()
+    #play1 = models.Playlist(playlist_name='test2')
+    #play1.save()
 
-    long_menu.pack(pady=60,side="bottom")
-    #playlist_window_frame.place(x=37, y=300, width=888,height=300)
-    
-    
+    hide_audio_controls()
+    hide_download()
+    show_download_button.place_forget()
+    audiocontrol_button.place_forget()
+
+    back_button.place(x=410, y=300)
+
+    list = []
+    playlists = models.Playlist.get_all()
+    for plist in playlists:
+        list.append(plist.__str__())
+
+    playlist_combo.config(values=list)
+    playlist_combo.place(x=50,y=425)
+
+
+
+   
     
 
     #cancion1 = models.Song(song_id=1,song_name='test1', song_route='/home')
     #cancion1.save()
     
-    path= MUSIC_PATH
-    if path:
-        os.chdir(path)
-        songs=os.listdir(path)
-        print(songs)
-        for song in songs:
-            if song.endswith(".mp3"):
-                playlist.insert(END, song[0: -4])
+    # path= MUSIC_PATH
+    # if path:
+    #     os.chdir(path)
+    #     songs=os.listdir(path)
+    #     print(songs)
+    #     for song in songs:
+    #         if song.endswith(".mp3"):
+    #             playlist.insert(END, song[0: -4])
 
 def play_song():    
     song_name=playlist.get(ACTIVE)
@@ -401,8 +423,9 @@ root.configure(bg="#0f1a2b")
 root.resizable(False,False)
 
 mixer.init()
-#db.run()
+init_db.run()
 checkIfAudioDirectoryExist()
+actual_state = STATE.AUDIOCONTROL
 
 
 ###############
@@ -446,6 +469,42 @@ pause_button = Button(root,image=pause_button_img,bg="#0f1a2b",
 pause_button.place(x=255,y=550)
 
 
+#   #   ###   #   #
+#Playlist en MAIN #
+#   #   ###   #   #
+
+#Menu
+short_menu_img = PhotoImage(file="gui/short_menu.png")
+short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
+short_menu.pack(padx=10,pady=50,side=RIGHT)
+
+#Frame del menu
+music_frame = Frame(root, bd=2,relief=RIDGE)
+music_frame.place(x=410, y=350, width=560,height=250)
+
+#Botón para mostrar 'Descargar'
+show_download_button = Button(root, text="Descargar canción", width=18, height=2,
+ font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_download)
+show_download_button.place(x=410, y=300)
+
+#Botón para mostrar 'Playlist window'
+playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2,
+ font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_playlist)
+playlist_button.place(x=815, y=300)
+
+#Lista de canciones de la playlist seleccionada
+scroll = Scrollbar(music_frame)
+playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black",selectbackground="blue", selectforeground="white",
+cursor="hand2", bd=0, yscrollcommand=scroll.set)
+scroll.config(command=playlist.yview)
+scroll.pack(side=RIGHT, fill=Y)
+playlist.pack(side=LEFT, fill=BOTH)
+
+#Label del título de la canción
+song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
+song_label.place(x=330,y=265, anchor="w")
+
+
 #   #   ###   #    #
 #Descargas en MAIN #
 #   #   ###   #    #
@@ -467,53 +526,17 @@ audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2
 #audiocontrol_button.place(x=410, y=300)
 
 
-#   #   ###   #   #
-#Playlist en MAIN #
-#   #   ###   #   #
-
-#Menu
-short_menu_img = PhotoImage(file="gui/short_menu.png")
-short_menu = Label(root,image=short_menu_img,bg="#0f1a2b")
-short_menu.pack(padx=35,pady=50,side=RIGHT)
-
-#Frame del menu
-music_frame = Frame(root, bd=2,relief=RIDGE)
-music_frame.place(x=410, y=350, width=545,height=250)
-
-#Botón para mostrar 'Descargar'
-show_download_button = Button(root, text="Descargar canción", width=18, height=2,
- font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_download)
-show_download_button.place(x=410, y=300)
-
-#Botón para mostrar 'Playlist window'
-playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2,
- font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_playlist)
-playlist_button.place(x=800, y=300)
-
-#Lista de acnciones de la playlist seleccionada
-scroll = Scrollbar(music_frame)
-playlist = Listbox(music_frame, width=75, font=("arial",10,), bg="#AFD4E4", fg="black",selectbackground="blue", selectforeground="white",
-cursor="hand2", bd=0, yscrollcommand=scroll.set)
-scroll.config(command=playlist.yview)
-scroll.pack(side=RIGHT, fill=Y)
-playlist.pack(side=LEFT, fill=BOTH)
-
-#Label del título de la canción
-song_label = Label(root, text="ASDASDASDASD", font=("arial", 15), fg="white", bg="#0f1a2b")
-song_label.place(x=330,y=265, anchor="w")
-
-
 
 ####################
  # PLAYLIST WINDOW #
  ###################
 
-playlist_window_frame = Frame(root, bd=2,relief=RIDGE)
-#playlist_window_frame.place(x=410, y=350, width=560,height=250)
+back_button_img = PhotoImage(file="gui/back_button.png")
+back_button = Button(root, image=back_button_img , bd =0, command=show_audiocontrols)
 
-long_menu_img = PhotoImage(file="gui/long_menu.png")
-long_menu = Label(root,image=long_menu_img,bg="#0f1a2b")
-#long_menu.pack(padx=10,pady=50,side=RIGHT)
+playlist_combo = Combobox(state="readonly",width=20)
+playlist_combo.bind("<<ComboboxSelected>>", combo_function)
+
 
 
 
