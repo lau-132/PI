@@ -478,7 +478,7 @@ short_menu.pack(padx=35,pady=50,side=RIGHT)
 
 #Frame del menu
 music_frame = Frame(root, bd=2,relief=RIDGE)
-music_frame.place(x=410, y=350, width=560,height=250)
+music_frame.place(x=410, y=350, width=545,height=250)
 
 #Botón para mostrar 'Descargar'
 show_download_button = Button(root, text="Descargar canción", width=18, height=2,
@@ -488,11 +488,11 @@ show_download_button.place(x=410, y=300)
 #Botón para mostrar 'Playlist window'
 playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2,
  font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_playlist)
-playlist_button.place(x=815, y=300)
+playlist_button.place(x=800, y=300)
 
 #Lista de acnciones de la playlist seleccionada
 scroll = Scrollbar(music_frame)
-playlist = Listbox(music_frame, width=100, font=("arial",10,), bg="#AFD4E4", fg="black",selectbackground="blue", selectforeground="white",
+playlist = Listbox(music_frame, width=75, font=("arial",10,), bg="#AFD4E4", fg="black",selectbackground="blue", selectforeground="white",
 cursor="hand2", bd=0, yscrollcommand=scroll.set)
 scroll.config(command=playlist.yview)
 scroll.pack(side=RIGHT, fill=Y)
