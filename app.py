@@ -271,20 +271,22 @@
 ################################################ Interfaz Gráfica ################################################
 #######################################################2.0########################################################
 ##################################################################################################################
-
-import os
-import tkinter as tk
+from datetime import time
 from tkinter import *
 from tkinter import messagebox, filedialog
 from tkinter.ttk import Combobox
 from pygame import *
 from pytube import YouTube
-from mutagen.mp3 import MP3
+from idlelib.tooltip import Hovertip
+
+import tkinter as tk
+import os
 import moviepy.editor as mp
-import db
 import models
 import threading
 import init_db
+
+
 #from db import Song
 
 #Constantes
@@ -312,35 +314,43 @@ def addManySongs():
     list = []
     for song in songs:
         print(MUSIC_PATH)
-        song = song.replace(MUSIC_PATH, " ")
+        song = song.replace(MUSIC_PATH+'/', "")
         list.append(song)
 
     song_combo.config(values=list)
     
 #Funcion de descarga para lanzar con un hilo
 def download_thread_function(URL):
-        song_path = MUSIC_PATH+'/{0}'
-        yt = YouTube(url=URL)
+    song_path = MUSIC_PATH+'/{0}'
+    yt = YouTube(url=URL)
 
-        if '#' in yt.title:
-            song_title = yt.title.replace('#',"")
-        else:
-            song_title = yt.title
+    if '#' or'\\' or '/' or ':' or '*' or '?' or '"' or '<' or '>' or '|' in yt.title:
+        song_title = yt.title.replace('#',"")
+        song_title = yt.title.replace('\\',"")
+        song_title = yt.title.replace(':',"")
+        song_title = yt.title.replace('*',"")
+        song_title = yt.title.replace('?',"")
+        song_title = yt.title.replace('"',"")
+        song_title = yt.title.replace('<',"")
+        song_title = yt.title.replace('>',"")
+        song_title = yt.title.replace('|',"")
+    else:
+        song_title = yt.title
 
-        checkIfAudioDirectoryExist()
+    checkIfAudioDirectoryExist()
 
-        #Descarga el video a menor resulución a la carpeta de música
-        yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
-        
-        t = threading.Thread(target=convert_song, args=(song_path, song_title, ))
-        t.start()
-        t.join()
+    #Descarga el video a menor resulución a la carpeta de música
+    yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+    
+    t = threading.Thread(target=convert_song, args=(song_path, song_title, ))
+    t.start()
+    t.join()
 
-        while t.is_alive():
-            continue
+    while t.is_alive():
+        continue
 
-        #Borra el video
-        os.remove(song_path.format(song_title)+'.mp4')
+    #Borra el video
+    os.remove(song_path.format(song_title)+'.mp4')
 
 #Funcion que convierte el video descargado a '.mp3'
 def convert_song(song_path, song_title):
@@ -364,6 +374,20 @@ def download():
         threading.Thread(target=download_thread_function, args=(URL,))
         print("Hilo de descarga - Fin")
        
+def alarma_func():
+    if alarma_var == 1:
+        dia_label.configure(state='disabled')
+        dia_combo.configure(state='disabled')
+        hora_label.configure(state='disabled')
+        hora_entry.configure(state='disabled')
+        alarma_var = 0
+    else:
+        dia_label.configure(state='normal')
+        dia_combo.configure(state='normal')
+
+        hora_label.configure(state='normal')
+        hora_entry.configure(state='normal')
+        alarma_var = 1
 
 #Funciones para limpiar zonas de la app
 def hide_audio_controls():
@@ -379,12 +403,23 @@ def hide_download():
     download_button.place_forget()
 
 def hide_playlist():
-    pass
+    new_playlist_label.place_forget()
+    new_playlist_entry.place_forget()
+
+    select_songs_button.place_forget()
+    song_combo.place_forget()
+    
+    dia_label.place_forget()
+    dia_combo.place_forget()
+
+    hora_label.place_forget()
+    hora_entry.place_forget()
 
 #Funciones para mostrar zonas de la app
 def show_audiocontrols():
     hide_download()
     hide_playlist()
+
     play_button.place(x=150,y=450)
     stop_button.place(x=75,y=550)
     resume_button.place(x=165,y=550)
@@ -396,6 +431,7 @@ def show_audiocontrols():
 
 def show_download():
     hide_audio_controls()
+    hide_playlist()
     show_download_button.place_forget()
 
     url_label.place(x=50,y=350)
@@ -403,38 +439,36 @@ def show_download():
     download_button.place(x=135,y=500)
     audiocontrol_button.place(x=410, y=300) 
 
-def show_playlist():
-    #play1 = models.Playlist(playlist_name='test2')
-    #play1.save()
+# play1 = models.Exchange(exchange_name='V2245', day_week=5 , play_hour = datetime.time(22, 45))
+# play1.save()
 
+def show_playlist():
     hide_audio_controls()
     hide_download()
     show_download_button.place_forget()
-    audiocontrol_button.place_configure(x=410, y=300)
     playlist_button.place_forget()
+
+    audiocontrol_button.place_configure(x=410, y=300)
 
     new_playlist_label.place(x=49,y=295)
     new_playlist_entry.place(x=50,y=320)
 
+    select_songs_button.place(x=50,y=370)
     song_combo.place(x=50,y=400)
-    select_songs_button.place(x=215,y=450)
+    
+    alarma_checkbox.place(x=50, y=440)
 
+    dia_label.place(x=50, y=485)
+    dia_combo.place(x=248, y=485)
+
+    hora_label.place(x=50, y=515)
+    hora_entry.place(x=268, y=515)
 
 
    
     
 
-    #cancion1 = models.Song(song_id=1,song_name='test1', song_route='/home')
-    #cancion1.save()
-    
-    # path= MUSIC_PATH
-    # if path:
-    #     os.chdir(path)
-    #     songs=os.listdir(path)
-    #     print(songs)
-    #     for song in songs:
-    #         if song.endswith(".mp3"):
-    #             playlist.insert(END, song[0: -4])
+
 
 def play_song():    
     song_name=playlist.get(ACTIVE)
@@ -573,7 +607,17 @@ audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2
 new_playlist_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",12), text="Introduzca el nombre de la nueva playlist:")
 new_playlist_entry = Entry(root, width=20,font=("arial",12))
 select_songs_button = Button(root,text="Elegir canciones" ,font=("arial",9), fg="white", bg="#21b3de", command=addManySongs)
-song_combo = Combobox(root, state="readonly",width=30, font=("arial",13),textvariable="No ha seleccionado ninguna canción")
-
+song_combo = Combobox(root, state="readonly",width=30, font=("arial",13))
+dia_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",10), text="Día de la semana:")
+dia_combo = Combobox(root, state="readonly",width=8, font=("arial",13), values=["Lunes",
+                                                                                 "Martes",
+                                                                                 "Miercoles",
+                                                                                 "Jueves",
+                                                                                 "Viernes"])
+alarma_var = IntVar(value=0)
+alarma_checkbox = Checkbutton(root, text='¿Reproducción programada?',bg="#0f1a2b", fg="white",font=("arial",10),variable=alarma_var, command=alarma_func)
+hora_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",10), text="Hora de reproduccion automática: ")
+hora_entry = Entry(root, width=8,font=("arial",12))
+hora_tooltip = Hovertip(hora_entry,'Introduzca la hora en formato HH:MM de 24 hrs. \n Por ejemplo, las 4 de la tarde: 16:00')
 
 root.mainloop()
