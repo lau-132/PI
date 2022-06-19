@@ -311,6 +311,8 @@ def addManySongs():
     #Bucle que "limpia" los strings de las canciones
     list = []
     for song in songs:
+        print(MUSIC_PATH)
+        song = song.replace(MUSIC_PATH, " ")
         list.append(song)
 
     song_combo.config(values=list)
@@ -415,7 +417,7 @@ def show_playlist():
     new_playlist_entry.place(x=50,y=320)
 
     song_combo.place(x=50,y=400)
-    select_songs_button.place(x=215,y=400)
+    select_songs_button.place(x=215,y=450)
 
 
 
@@ -571,7 +573,7 @@ audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2
 new_playlist_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",12), text="Introduzca el nombre de la nueva playlist:")
 new_playlist_entry = Entry(root, width=20,font=("arial",12))
 select_songs_button = Button(root,text="Elegir canciones" ,font=("arial",9), fg="white", bg="#21b3de", command=addManySongs)
-song_combo = Combobox(root, state="readonly",width=15, font=("arial",13),textvariable="No ha seleccionado ninguna canción")
+song_combo = Combobox(root, state="readonly",width=30, font=("arial",13),textvariable="No ha seleccionado ninguna canción")
 
 
 root.mainloop()
