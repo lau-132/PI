@@ -70,4 +70,4 @@ class Playlist_Song_Exchange(db.Base):
 
     @classmethod
     def get_by_id_playlist(cls, id):
-        return db.session.query(Playlist_Song_Exchange).filter_by(p_id=id)
+        return db.session.query(Playlist_Song_Exchange).filter_by(p_id=id).first()

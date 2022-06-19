@@ -275,7 +275,7 @@
 import os
 import tkinter as tk
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from tkinter.ttk import Combobox
 from pygame import *
 from pytube import YouTube
@@ -302,38 +302,66 @@ def checkIfAudioDirectoryExist():
 
 def combo_function(event):
     selection = playlist_combo.get()
+    print(selection)
 
-    tmp = models.Playlist_Song_Exchange.get_by_id_playlist(selection)
-    print(tmp)
-#Funcion de descarga para lanzar con un hilo
-def thread_function(URL):
-    song_path = MUSIC_PATH+'/{0}'
-    yt = YouTube(URL)
+# Funcion que añade varias canciones a la playlist en su creación
+def addManySongs():
 
-    checkIfAudioDirectoryExist()
+    songs = filedialog.askopenfilenames(initialdir='audio/', title='Elija una canción' ,filetypes=(("mp3 Files", "*.mp3"), ))
+    #Bucle que "limpia" los strings de las canciones
+    list = []
+    for song in songs:
+        list.append(song)
 
-    #Descarga el video a menor resulución a la carpeta de música
-    yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+    song_combo.config(values=list)
     
-    #La convierte a '.mp3'
-    song = mp.VideoFileClip(song_path.format(yt.title)+'.mp4')
-    song.audio.write_audiofile(song_path.format(yt.title)+'.mp3')
+#Funcion de descarga para lanzar con un hilo
+def download_thread_function(URL):
+        song_path = MUSIC_PATH+'/{0}'
+        yt = YouTube(url=URL)
 
-    #Borra el video
-    os.remove(song_path.format(yt.title)+'.mp4')
+        if '#' in yt.title:
+            song_title = yt.title.replace('#',"")
+        else:
+            song_title = yt.title
 
+        checkIfAudioDirectoryExist()
+
+        #Descarga el video a menor resulución a la carpeta de música
+        yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+        
+        t = threading.Thread(target=convert_song, args=(song_path, song_title, ))
+        t.start()
+        t.join()
+
+        while t.is_alive():
+            continue
+
+        #Borra el video
+        os.remove(song_path.format(song_title)+'.mp4')
+
+#Funcion que convierte el video descargado a '.mp3'
+def convert_song(song_path, song_title):
+    song = mp.VideoFileClip(song_path.format(song_title)+'.mp4')
+    song.audio.write_audiofile(song_path.format(song_title)+'.mp3')
+    song.close()
 
 
 #Función de botón para lanzar el hilo con validacion básica
 def download():
     URL = yt_url.get()
 
-    if URL is None:
+    print(URL)
+
+    if URL == "":
         messagebox.showinfo(message="La URL no puede estar vacía")
     elif YT_URL not in URL:
         messagebox.showinfo(message="La URL no es correcta, intentelo de nuevo")
     else:
-        threading.Thread(target=thread_function, args=(URL,))
+        print("Hilo de descarga - Start")
+        threading.Thread(target=download_thread_function, args=(URL,))
+        print("Hilo de descarga - Fin")
+       
 
 #Funciones para limpiar zonas de la app
 def hide_audio_controls():
@@ -349,7 +377,7 @@ def hide_download():
     download_button.place_forget()
 
 def hide_playlist():
-    back_button.place_forget()
+    pass
 
 #Funciones para mostrar zonas de la app
 def show_audiocontrols():
@@ -360,6 +388,7 @@ def show_audiocontrols():
     resume_button.place(x=165,y=550)
     pause_button.place(x=255,y=550)
     show_download_button.place(x=410, y=300)
+    playlist_button.place_configure(x=815, y=300)
 
 
 
@@ -379,17 +408,14 @@ def show_playlist():
     hide_audio_controls()
     hide_download()
     show_download_button.place_forget()
-    audiocontrol_button.place_forget()
+    audiocontrol_button.place_configure(x=410, y=300)
+    playlist_button.place_forget()
 
-    back_button.place(x=410, y=300)
+    new_playlist_label.place(x=49,y=295)
+    new_playlist_entry.place(x=50,y=320)
 
-    list = []
-    playlists = models.Playlist.get_all()
-    for plist in playlists:
-        list.append(plist.__str__())
-
-    playlist_combo.config(values=list)
-    playlist_combo.place(x=50,y=425)
+    song_combo.place(x=50,y=400)
+    select_songs_button.place(x=215,y=400)
 
 
 
@@ -488,7 +514,7 @@ show_download_button = Button(root, text="Descargar canción", width=18, height=
 show_download_button.place(x=410, y=300)
 
 #Botón para mostrar 'Playlist window'
-playlist_button = Button(root, text="Seleccionar playlist...", width=18, height=2,
+playlist_button = Button(root, text="Crear playlist", width=18, height=2,
  font=("arial",10,"bold"), fg="white", bg="#21b3de", command=show_playlist)
 playlist_button.place(x=815, y=300)
 
@@ -503,6 +529,17 @@ playlist.pack(side=LEFT, fill=BOTH)
 #Label del título de la canción
 song_label = Label(root, text="", font=("arial", 15), fg="white", bg="#0f1a2b")
 song_label.place(x=330,y=265, anchor="w")
+
+
+playlist_combo = Combobox(root, state="readonly",width=15, font=("arial",14))
+playlist_combo.bind("<<ComboboxSelected>>", combo_function)
+list = []
+playlists = models.Playlist.get_all()
+for plist in playlists:
+    list.append(plist.__str__())
+
+playlist_combo.config(values=list)
+playlist_combo.place(x=598,y=307)
 
 
 #   #   ###   #    #
@@ -531,13 +568,10 @@ audiocontrol_button = Button(root, text="Controles de audio", width=18, height=2
  # PLAYLIST WINDOW #
  ###################
 
-back_button_img = PhotoImage(file="gui/back_button.png")
-back_button = Button(root, image=back_button_img , bd =0, command=show_audiocontrols)
-
-playlist_combo = Combobox(state="readonly",width=20)
-playlist_combo.bind("<<ComboboxSelected>>", combo_function)
-
-
+new_playlist_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",12), text="Introduzca el nombre de la nueva playlist:")
+new_playlist_entry = Entry(root, width=20,font=("arial",12))
+select_songs_button = Button(root,text="Elegir canciones" ,font=("arial",9), fg="white", bg="#21b3de", command=addManySongs)
+song_combo = Combobox(root, state="readonly",width=15, font=("arial",13),textvariable="No ha seleccionado ninguna canción")
 
 
 root.mainloop()
