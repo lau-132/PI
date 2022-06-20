@@ -271,20 +271,23 @@
 ################################################ Interfaz Gráfica ################################################
 #######################################################2.0########################################################
 ##################################################################################################################
-from datetime import time
-from tkinter import *
-from tkinter import messagebox, filedialog
-from tkinter.ttk import Combobox
-from pygame import *
-from pytube import YouTube
-from idlelib.tooltip import Hovertip
 
 import tkinter as tk
 import os
+import tkinter
 import moviepy.editor as mp
+import pygame
 import models
 import threading
 import init_db
+
+from datetime import time
+from tkinter import *
+from tkinter import messagebox, filedialog
+from tkinter.tix import Balloon
+from tkinter.ttk import Combobox, Scale
+from pygame import *
+from pytube import YouTube
 
 
 #from db import Song
@@ -292,11 +295,6 @@ import init_db
 #Constantes
 MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
 YT_URL= 'https://www.youtube.com/watch?v='
-
-class STATE():
-    AUDIOCONTROL = 1
-    DOWNLOAD = 2
-    PLAYLIST = 3
 
 #Funcion que revisa si el directorio de .mp3's existe, sino, lo crea
 def checkIfAudioDirectoryExist():
@@ -352,6 +350,10 @@ def download_thread_function(URL):
     #Borra el video
     os.remove(song_path.format(song_title)+'.mp4')
 
+
+    tmp_song = models.Song(song_name=song_title, song_route = song_path.format(song_title)+'.mp3')
+    tmp_song.save()
+
 #Funcion que convierte el video descargado a '.mp3'
 def convert_song(song_path, song_title):
     song = mp.VideoFileClip(song_path.format(song_title)+'.mp4')
@@ -363,31 +365,17 @@ def convert_song(song_path, song_title):
 def download():
     URL = yt_url.get()
 
-    print(URL)
+    #print(URL)
 
     if URL == "":
         messagebox.showinfo(message="La URL no puede estar vacía")
     elif YT_URL not in URL:
         messagebox.showinfo(message="La URL no es correcta, intentelo de nuevo")
     else:
-        print("Hilo de descarga - Start")
+        print("Hilo de descarga lanzado")
         threading.Thread(target=download_thread_function, args=(URL,))
-        print("Hilo de descarga - Fin")
-       
-def alarma_func():
-    if alarma_var == 1:
-        dia_label.configure(state='disabled')
-        dia_combo.configure(state='disabled')
-        hora_label.configure(state='disabled')
-        hora_entry.configure(state='disabled')
-        alarma_var = 0
-    else:
-        dia_label.configure(state='normal')
-        dia_combo.configure(state='normal')
 
-        hora_label.configure(state='normal')
-        hora_entry.configure(state='normal')
-        alarma_var = 1
+        
 
 #Funciones para limpiar zonas de la app
 def hide_audio_controls():
@@ -395,6 +383,8 @@ def hide_audio_controls():
     stop_button.place_forget()
     resume_button.place_forget()
     pause_button.place_forget()
+    volume_label.place_forget()
+    volume_slider.place_forget()
 
 def hide_download():
     url_label.place_forget()
@@ -426,6 +416,8 @@ def show_audiocontrols():
     pause_button.place(x=255,y=550)
     show_download_button.place(x=410, y=300)
     playlist_button.place_configure(x=815, y=300)
+    volume_label.place(x=75,y=350)
+    volume_slider.place(x=115,y=357)
 
 
 
@@ -455,17 +447,16 @@ def show_playlist():
 
     select_songs_button.place(x=50,y=370)
     song_combo.place(x=50,y=400)
-    
-    alarma_checkbox.place(x=50, y=440)
 
-    dia_label.place(x=50, y=485)
-    dia_combo.place(x=248, y=485)
+    dia_label.place(x=50, y=467)
+    dia_combo.place(x=248, y=465)
 
-    hora_label.place(x=50, y=515)
-    hora_entry.place(x=268, y=515)
+    hora_label.place(x=50, y=498)
+    hora_entry.place(x=268, y=495)
 
 
-   
+def create_Playlist():
+    models.Playlist(playlist_name = new_playlist_entry.get())
     
 
 
@@ -477,6 +468,9 @@ def play_song():
     song_label.config(text=song_name[0: -4])
 
 
+def volume_control(x):
+    pygame.mixer.music.set_volume(volume_slider.get())
+
 # INICIALIZACIONES #
 root = tk.Tk()
 root.title('Proyecto Integrado - MP3 Player')
@@ -487,7 +481,6 @@ root.resizable(False,False)
 mixer.init()
 init_db.run()
 checkIfAudioDirectoryExist()
-actual_state = STATE.AUDIOCONTROL
 
 
 ###############
@@ -509,6 +502,13 @@ Label(root, image=Logo, bg="#0f1a2b").place(x=107,y=107)
 #     #      ###     #      #
 #Controles de audio en MAIN #
 #     #      ###     #      #
+
+volume_img = PhotoImage(file="gui/volume.png")
+volume_label = Label(root,image=volume_img,bg="#0f1a2b")
+volume_label.place(x=75,y=350)
+volume_slider = Scale(from_=0, to=1, orient=HORIZONTAL, length=200, value=1, command=volume_control)
+volume_slider.place(x=115,y=357)
+
 
 play_button_img = PhotoImage(file="gui/play.png")
 play_button = Button(root,image=play_button_img,bg="#0f1a2b",
@@ -614,10 +614,12 @@ dia_combo = Combobox(root, state="readonly",width=8, font=("arial",13), values=[
                                                                                  "Miercoles",
                                                                                  "Jueves",
                                                                                  "Viernes"])
-alarma_var = IntVar(value=0)
-alarma_checkbox = Checkbutton(root, text='¿Reproducción programada?',bg="#0f1a2b", fg="white",font=("arial",10),variable=alarma_var, command=alarma_func)
+
 hora_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",10), text="Hora de reproduccion automática: ")
 hora_entry = Entry(root, width=8,font=("arial",12))
-hora_tooltip = Hovertip(hora_entry,'Introduzca la hora en formato HH:MM de 24 hrs. \n Por ejemplo, las 4 de la tarde: 16:00')
+
+create_playlist_button = Button(root,text="Crear playlist" ,font=("arial",9), fg="white", bg="#21b3de", command=create_Playlist)
+
 
 root.mainloop()
+
