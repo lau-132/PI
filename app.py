@@ -306,14 +306,17 @@ def combo_function(event):
 
 # Funcion que añade varias canciones a la playlist en su creación
 def addManySongs():
-    songs = filedialog.askopenfilenames(initialdir='audio/', title='Elija una canción' ,filetypes=(("mp3 Files", "*.mp3"), ))
+    songs = filedialog.askopenfilenames(initialdir='audio/', title='Elija una canción')
+    #filetypes=(("mp3 Files", "*.mp3"), )
     #Bucle que "limpia" los strings de las canciones
     list = []
     for song in songs:
+        print(song)
         song = song.replace(MUSIC_PATH+'/', "")
-        list.append(song)
+        playlist.insert(END, song)
+        print(song)
 
-    song_combo.config(values=list)
+    
     
 #Funcion de descarga para lanzar con un hilo
 def download_thread_function(URL):
@@ -330,7 +333,7 @@ def download_thread_function(URL):
     checkIfAudioDirectoryExist()
 
     #Descarga el video a menor resulución a la carpeta de música
-    yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH)
+    yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH, filename= song_title)
     
     t = threading.Thread(target=convert_song, args=(song_path, song_title, ))
     t.start()
@@ -365,7 +368,36 @@ def download():
         messagebox.showinfo(message="La URL no es correcta, intentelo de nuevo")
     else:
         print("Hilo de descarga lanzado")
-        threading.Thread(target=download_thread_function, args=(URL,))
+        #threading.Thread(target=download_thread_function, args=(URL,))
+
+        song_path = MUSIC_PATH+'/{0}'
+        yt = YouTube(url=URL)
+
+        words_title = re.findall("\w*\s*",yt.title)
+        
+        song_title = ""
+        for s in words_title:
+            song_title += s
+        print(song_title)
+
+        checkIfAudioDirectoryExist()
+
+        #Descarga el video a menor resulución a la carpeta de música
+        yt.streams.get_lowest_resolution().download(output_path=MUSIC_PATH, filename= song_title)
+        
+        t = threading.Thread(target=convert_song, args=(song_path, song_title, ))
+        t.start()
+        t.join()
+
+        while t.is_alive():
+            continue
+
+        #Borra el video
+        os.remove(song_path.format(song_title)+".mp4")
+
+
+        tmp_song = models.Song(song_name=song_title, song_route = song_path.format(song_title)+'.mp3')
+        tmp_song.save()
 
 
 #Funciones para limpiar zonas de la app
@@ -397,6 +429,8 @@ def hide_playlist():
 
     hora_label.place_forget()
     hora_entry.place_forget()
+
+    create_playlist_button.place_forget()
 
 #Funciones para mostrar zonas de la app
 def show_audiocontrols():
@@ -458,7 +492,7 @@ def create_Playlist():
 
 def play_song():    
     song_name=playlist.get(ACTIVE)
-    mixer.music.load(playlist.get(ACTIVE))
+    mixer.music.load(song_name)
     mixer.music.play()
     song_label.config(text=song_name[0: -4])
 
@@ -613,7 +647,7 @@ dia_combo = Combobox(root, state="readonly",width=8, font=("arial",13), values=[
 hora_label = Label(root,bg="#0f1a2b", fg="white", anchor='w', font=("arial",10), text="Hora de reproduccion automática: ")
 hora_entry = Entry(root, width=8,font=("arial",12))
 
-create_playlist_button = Button(root,text="Crear playlist" ,font=("arial",9), fg="white", bg="#21b3de", command=create_Playlist)
+create_playlist_button = Button(root,text="Crear playlist" ,font=("arial",9), fg="white", bg="#21b3de", command=addManySongs)
 
 
 root.mainloop()
