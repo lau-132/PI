@@ -274,23 +274,20 @@
 
 import tkinter as tk
 import os
-import tkinter
 import moviepy.editor as mp
 import pygame
 import models
 import threading
 import init_db
+import re
 
 from datetime import time
 from tkinter import *
 from tkinter import messagebox, filedialog
-from tkinter.tix import Balloon
 from tkinter.ttk import Combobox, Scale
 from pygame import *
 from pytube import YouTube
 
-
-#from db import Song
 
 #Constantes
 MUSIC_PATH = os.path.dirname(os.path.abspath(__file__)) + "/audio"
@@ -302,16 +299,17 @@ def checkIfAudioDirectoryExist():
 
 def combo_function(event):
     selection = playlist_combo.get()
+
+
+    models.Playlist_Song_Exchange.get_by_playlist_name()
     print(selection)
 
 # Funcion que añade varias canciones a la playlist en su creación
 def addManySongs():
-
     songs = filedialog.askopenfilenames(initialdir='audio/', title='Elija una canción' ,filetypes=(("mp3 Files", "*.mp3"), ))
     #Bucle que "limpia" los strings de las canciones
     list = []
     for song in songs:
-        print(MUSIC_PATH)
         song = song.replace(MUSIC_PATH+'/', "")
         list.append(song)
 
@@ -322,18 +320,12 @@ def download_thread_function(URL):
     song_path = MUSIC_PATH+'/{0}'
     yt = YouTube(url=URL)
 
-    if '#' or'\\' or '/' or ':' or '*' or '?' or '"' or '<' or '>' or '|' in yt.title:
-        song_title = yt.title.replace('#',"")
-        song_title = yt.title.replace('\\',"")
-        song_title = yt.title.replace(':',"")
-        song_title = yt.title.replace('*',"")
-        song_title = yt.title.replace('?',"")
-        song_title = yt.title.replace('"',"")
-        song_title = yt.title.replace('<',"")
-        song_title = yt.title.replace('>',"")
-        song_title = yt.title.replace('|',"")
-    else:
-        song_title = yt.title
+    words_title = re.findall("\w*\s*",yt.title)
+    
+    song_title = ""
+    for s in words_title:
+        song_title += s
+    print(song_title)
 
     checkIfAudioDirectoryExist()
 
@@ -375,7 +367,6 @@ def download():
         print("Hilo de descarga lanzado")
         threading.Thread(target=download_thread_function, args=(URL,))
 
-        
 
 #Funciones para limpiar zonas de la app
 def hide_audio_controls():
@@ -389,6 +380,8 @@ def hide_audio_controls():
 def hide_download():
     url_label.place_forget()
     yt_url.place_forget()
+    yt_url.delete(0,END)
+    yt_url.insert(0,"")
     audiocontrol_button.place_forget()
     download_button.place_forget()
 
@@ -445,8 +438,8 @@ def show_playlist():
     new_playlist_label.place(x=49,y=295)
     new_playlist_entry.place(x=50,y=320)
 
-    select_songs_button.place(x=50,y=370)
-    song_combo.place(x=50,y=400)
+    select_songs_button.place(x=50,y=390)
+    song_combo.place(x=50,y=420)
 
     dia_label.place(x=50, y=467)
     dia_combo.place(x=248, y=465)
@@ -454,9 +447,11 @@ def show_playlist():
     hora_label.place(x=50, y=498)
     hora_entry.place(x=268, y=495)
 
+    create_playlist_button.place(x=265, y=596)
 
 def create_Playlist():
     models.Playlist(playlist_name = new_playlist_entry.get())
+    
     
 
 

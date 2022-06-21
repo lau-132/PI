@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 class Playlist(db.Base):
     __tablename__ = 'playlists'
 
-    playlist_id = Column(Integer, primary_key=True)
-    playlist_name = Column(String)
+    #playlist_id = Column(Integer, primary_key=True)
+    playlist_name = Column(String, primary_key=True)
 
     songs = relationship('Song', secondary='playlists_songs_exchanges')
     exchanges = relationship('Exchange', secondary='playlists_songs_exchanges')
@@ -64,10 +64,10 @@ class Exchange (db.Base):
 class Playlist_Song_Exchange(db.Base):
     __tablename__= 'playlists_songs_exchanges'
 
-    p_id = Column(Integer, ForeignKey('playlists.playlist_id'), primary_key=True)
+    p_name = Column(String, ForeignKey('playlists.playlist_name'), primary_key=True)
     s_id = Column(Integer, ForeignKey('songs.song_id'), primary_key=True)
     e_name = Column(String, ForeignKey('exchanges.exchange_name'), primary_key=True, nullable=True)
 
     @classmethod
-    def get_by_id_playlist(cls, id):
-        return db.session.query(Playlist_Song_Exchange).filter_by(p_id=id).first()
+    def get_by_playlist_name(cls, name):
+        return db.session.query(Playlist_Song_Exchange).filter_by(p_name=name)
